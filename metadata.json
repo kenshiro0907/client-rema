@@ -1,0 +1,8 @@
+{
+  "name": "Ariane REMA - Household Management",
+  "description": "A web application for managing and tracking households, based on the provided design. This interface allows users to filter and view a list of households.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "prompt": ""
+}

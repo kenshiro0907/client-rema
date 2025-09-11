@@ -1,0 +1,44 @@
+{
+  "markers": [
+    { "address": "2 Avenue du Président Salvador Allende, 93100 Montreuil", "type": "signalement" },
+    { "address": "15 Rue de la Solidarité, 93100 Montreuil", "type": "signalement" },
+    { "address": "Place Jean Jaurès, 93100 Montreuil", "type": "veille" },
+    { "address": "112 Avenue du Colonel Fabien, 93170 Bagnolet", "type": "veille" },
+    { "address": "Parc des Beaumonts, 93100 Montreuil", "type": "exploratoire" },
+    { "address": "Centre Commercial Bel Est, 28 Avenue du Général de Gaulle, 93170 Bagnolet", "type": "exploratoire" },
+    { "address": "Rue de Rosny, 93100 Montreuil", "type": "note" },
+    { "address": "24 Rue du Progrès, 93100 Montreuil", "type": "position" }
+  ],
+  "zoneToExplore": [
+    "Place Jean Jaurès, 93100 Montreuil",
+    "Rue de Rosny, 93100 Montreuil",
+    "56 Boulevard Henri Barbusse, 93100 Montreuil",
+    "Parc des Beaumonts, 93100 Montreuil"
+  ],
+  "summary": {
+    "laTournee": {
+      "title": "La tournée",
+      "headers": ["Signalements", "Veilles", "Exploratoires"],
+      "rows": [
+        ["A rencontrer", 15, 9, 4],
+        ["Rencontré", 1, 3, 4]
+      ]
+    },
+    "lesDistributions": {
+      "title": "Les distributions",
+      "headers": ["Repas", "Soupe", "Duvet", "Kit toillette", "Vêtement", "Eau", "Café"],
+      "rows": [
+        ["Demandé", 8, 2, 4, 7, 6, 13, 11],
+        ["Distribué", 4, 0, 2, 5, 4, 17, 12]
+      ]
+    },
+    "lesPrestationsSociales": {
+      "title": "Les prestations sociales",
+      "headers": ["Evaluation sociale", "Orientation", "Signalement"],
+      "rows": [
+        ["Demandé", 8, 9, 4],
+        ["Réalisé", 3, 5, 4]
+      ]
+    }
+  }
+}

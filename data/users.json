@@ -1,0 +1,21 @@
+
+[
+  {
+    "email": "intervenant.maraude@gmail.com",
+    "password": "password123",
+    "camion": "Camion",
+    "service": "Samu Social 1"
+  },
+  {
+    "email": "coordinateur@association.org",
+    "password": "super_password",
+    "camion": "Camion",
+    "service": "Samu Social 2"
+  },
+  {
+    "email": "admin@rema.fr",
+    "password": "admin",
+    "camion": "Bureau",
+    "service": "Administration"
+  }
+]
