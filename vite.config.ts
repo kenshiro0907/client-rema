@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "."),
       },
     },
-    server: {
+    /*server: {
       proxy: {
         "/api": {
           target: "https://re7-rema-il93.ariane-suivi-social.net",
@@ -20,6 +20,6 @@ export default defineConfig(({ mode }) => {
           cookieDomainRewrite: "localhost",
         },
       },
-    },
+    },*/
   };
 });

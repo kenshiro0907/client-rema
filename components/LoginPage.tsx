@@ -23,14 +23,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     }
 
     try {
-      const response = await fetch("/api/auth/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ username: email, password }),
-      });
+      const response = await fetch(
+        "https://re7-rema-il93.ariane-suivi-social.net/api/auth/login/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ username: email, password }),
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 401) {
