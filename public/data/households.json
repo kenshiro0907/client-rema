@@ -1,0 +1,139 @@
+
+[
+  {
+    "id": "1",
+    "nom": "Shakur",
+    "prenom": "Tupac",
+    "idSisiao": "548965841",
+    "adresse": "12 Rue du Progrès",
+    "codePostal": "93100",
+    "secteur": 2,
+    "statut": "A rencontrer",
+    "synthese": "",
+    "compositionFamiliale": "Couple avec enfant(s)",
+    "members": [
+      {
+        "id": "41169627",
+        "isPrincipal": true,
+        "nom": "PRODHAN",
+        "prenom": "Mumu",
+        "tel": "0667727995",
+        "naissance": "15/07/85",
+        "age": 38,
+        "sexe": "F",
+        "situation": "Marié(e)"
+      },
+      {
+        "id": "41169630",
+        "isPrincipal": false,
+        "nom": "PRODHAN",
+        "prenom": "Meherin",
+        "tel": "0758116639",
+        "naissance": "25/09/13",
+        "age": 10,
+        "sexe": "F",
+        "situation": "Enfant / Mineur en famille"
+      },
+      {
+        "id": "41169629",
+        "isPrincipal": false,
+        "nom": "PRODHAN",
+        "prenom": "Muhin",
+        "tel": "0758116639",
+        "naissance": "17/06/07",
+        "age": 16,
+        "sexe": "M",
+        "situation": "Enfant / Mineur en famille"
+      },
+      {
+        "id": "41169628",
+        "isPrincipal": false,
+        "nom": "PRODHAN",
+        "prenom": "Mahin",
+        "tel": "0758116639",
+        "naissance": "05/04/05",
+        "age": 18,
+        "sexe": "M",
+        "situation": "Enfant / Mineur en famille"
+      },
+      {
+        "id": "41169604",
+        "isPrincipal": false,
+        "nom": "PRODHAN",
+        "prenom": "Mamun",
+        "tel": "0758116639",
+        "naissance": "10/05/69",
+        "age": 54,
+        "sexe": "M",
+        "situation": "Marié(e)"
+      }
+    ],
+    "demande": {
+      "idDemande": "2569856",
+      "date": "06/02/2024",
+      "statutDemandeSisiao": "En attente de traitement",
+      "localisation": {
+        "adresse": "12 Rue du Progrès",
+        "codePostal": "93100",
+        "commentaire": "Monsieur et Madame sont à coté de la boulangerie du centre commercial"
+      },
+      "details": {
+        "typeDemandes": "Autre, Douche, Soupe",
+        "commentaire": "Monsieur demande un duvet et Madame un repas chaud"
+      }
+    },
+    "history": [
+      { "idDemande": "2569801", "statutDemandeSisiao": "Clôturée", "date": "01/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Aide alimentaire", "commentaire": "Distribution de colis." } },
+      { "idDemande": "2569802", "statutDemandeSisiao": "Clôturée", "date": "05/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Hébergement", "commentaire": "Nuitée au centre d'urgence." } },
+      { "idDemande": "2569803", "statutDemandeSisiao": "Clôturée", "date": "10/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Douche", "commentaire": "La personne ne s'est pas présentée." } },
+      { "idDemande": "2569804", "statutDemandeSisiao": "En attente", "date": "12/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Vêtements", "commentaire": "Fourniture d'un manteau." } },
+      { "idDemande": "2569805", "statutDemandeSisiao": "Clôturée", "date": "15/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Aide alimentaire", "commentaire": "Distribution de colis." } },
+      { "idDemande": "2569806", "statutDemandeSisiao": "Clôturée", "date": "18/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Soupe", "commentaire": "Repas chaud servi." } },
+      { "idDemande": "2569807", "statutDemandeSisiao": "Clôturée", "date": "20/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Aide administrative", "commentaire": "Aide pour documents." } },
+      { "idDemande": "2569808", "statutDemandeSisiao": "Clôturée", "date": "22/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Hébergement", "commentaire": "Nuitée au centre d'urgence." } },
+      { "idDemande": "2569809", "statutDemandeSisiao": "En attente", "date": "25/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Autre", "commentaire": "Demande hors périmètre." } },
+      { "idDemande": "2569810", "statutDemandeSisiao": "Clôturée", "date": "28/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Aide alimentaire", "commentaire": "Distribution de colis." } },
+      { "idDemande": "2569811", "statutDemandeSisiao": "Clôturée", "date": "30/01/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Douche", "commentaire": "Accès aux sanitaires." } },
+      { "idDemande": "2569812", "statutDemandeSisiao": "En attente", "date": "01/02/2024", "localisation": { "adresse": "27 Bis Rue du Progrès", "codePostal": "93100", "commentaire": "" }, "details": { "typeDemandes": "Hébergement", "commentaire": "En attente de place." } }
+    ]
+  },
+  {
+    "id": "2",
+    "nom": "BIG",
+    "prenom": "Notorious",
+    "idSisiao": "458965214",
+    "adresse": "12 rue de la East Coast",
+    "codePostal": "93800",
+    "secteur": 1,
+    "statut": "Rencontré",
+    "synthese": "",
+    "compositionFamiliale": "Personne seule",
+    "members": [
+       {
+        "id": "31169627",
+        "isPrincipal": true,
+        "nom": "BIG",
+        "prenom": "Notorious",
+        "tel": "0612345678",
+        "naissance": "21/05/72",
+        "age": 52,
+        "sexe": "M",
+        "situation": "Célibataire"
+      }
+    ],
+    "demande": {
+      "idDemande": "3569856",
+      "date": "05/02/2024",
+      "statutDemandeSisiao": "En attente de traitement",
+      "localisation": {
+        "adresse": "Avenue de la République, 75011 Paris",
+        "codePostal": "75011",
+        "commentaire": "Près de la station de métro."
+      },
+      "details": {
+        "typeDemandes": "Hébergement d'urgence",
+        "commentaire": "Besoin d'un abri pour la nuit."
+      }
+    }
+  }
+]
