@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Household, Demande, ContactData, ClotureMotif } from '../types';
+import { useHouseholds } from '../contexts/AppContext';
 import ContactModal from './ContactModal';
 import ClotureModal from './ClotureModal';
 
@@ -7,11 +8,12 @@ declare var L: any;
 
 interface HouseholdDetailProps {
   household: Household;
-  onUpdateHousehold: (householdId: string, updates: Partial<Household>) => void;
+  onUpdateHousehold?: (householdId: string, updates: Partial<Household>) => void;
 }
 
 const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHousehold }) => {
-  const [activeTab, setActiveTab] = useState('Informations générales');
+  const { updateHousehold } = useHouseholds();
+  const [activeTab, setActiveTab] = useState('Infos générales');
   const [historyCurrentPage, setHistoryCurrentPage] = useState(1);
   const [isContactModalOpen, setContactModalOpen] = useState(false);
   const [isClotureModalOpen, setClotureModalOpen] = useState(false);
@@ -59,14 +61,14 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
 
   // Reset state when household changes
   useEffect(() => {
-    setActiveTab('Informations générales');
+    setActiveTab('Infos générales');
     setHistoryCurrentPage(1);
     setGeoState({ loading: false, error: null, coords: null }); // Reset geo state
   }, [household.id]);
 
   // Effect to handle geocoding when tab is active
   useEffect(() => {
-    if (activeTab === 'Demande en cours' && household.demande) {
+    if (activeTab === 'Demande active' && household.demande) {
       geocodeAddress(household.demande.localisation);
     }
   }, [activeTab, household.demande, geocodeAddress]);
@@ -74,7 +76,7 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
 
   // Effect to initialize and update the map
   useEffect(() => {
-    if (activeTab !== 'Demande en cours' || !mapContainerRef.current) {
+    if (activeTab !== 'Demande active' || !mapContainerRef.current) {
       return;
     }
 
@@ -151,7 +153,8 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
   
   const handleSaveCloture = (motif: ClotureMotif) => {
     console.log(`Clôture du ménage ${household.id} pour motif: ${motif}`);
-    onUpdateHousehold(household.id, { statut: 'Clôturé' });
+    const updateFunction = onUpdateHousehold || updateHousehold;
+    updateFunction(household.id, { statut: 'Clôturé' });
     setClotureModalOpen(false);
   };
 
@@ -164,7 +167,19 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
   const emptyHistoryRowsCount = Math.max(0, HISTORY_PAGE_SIZE - paginatedHistory.length);
   const emptyHistoryRows = Array.from({ length: emptyHistoryRowsCount });
 
-  const tabs = ['Informations générales', 'Suivi social', 'Demande en cours', 'Historique des demandes'];
+  // Define tabs based on requirements
+  const getAvailableTabs = () => {
+    const baseTabs = ['Infos générales', 'Evaluations', 'Suivi social', 'Prestations', 'Diagnostic'];
+    
+    // Add "Demande active" only if there's an active demand with "En attente de traitement" status
+    if (household.demande && household.demande.statutDemandeSisiao === 'En attente de traitement') {
+      return ['Infos générales', 'Demande active', ...baseTabs.slice(1)];
+    }
+    
+    return baseTabs;
+  };
+
+  const tabs = getAvailableTabs();
 
   return (
     <>
@@ -203,7 +218,7 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
       </nav>
 
       {/* General Information Section */}
-      {activeTab === 'Informations générales' && (
+      {activeTab === 'Infos générales' && (
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 mb-8 text-gray-800">
             <InfoBlock label="ID SISIAO" value={household.idSisiao} />
@@ -249,31 +264,56 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
             <InfoBlock label="Statut ménage" value={household.statut} />
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-                <thead>
-                    <tr className="bg-white">
-                        {[...Array(8)].map((_, i) => (
-                            <th key={`head-empty-${i}`} className="border border-gray-300 p-2 h-10"></th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {[...Array(5)].map((_, rowIndex) => (
-                        <tr key={`row-empty-${rowIndex}`} className="bg-white h-[45px]">
-                            {[...Array(8)].map((_, colIndex) => (
-                               <td key={`cell-empty-${rowIndex}-${colIndex}`} className="border border-gray-300"></td>
-                            ))}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+          <div className="space-y-6">
+            {/* Lieu de vie et condition matérielle */}
+            <div className="bg-white rounded-lg border border-gray-300 p-6">
+              <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-300 pb-2 mb-4">
+                Lieu de vie et condition matérielle
+              </h3>
+              <div className="text-center text-gray-500 py-4">
+                <p>Informations mises à jour suite aux diagnostics EMA</p>
+                <p className="text-sm mt-2">Aucune information disponible actuellement</p>
+              </div>
+            </div>
+
+            {/* Hygiène et santé */}
+            <div className="bg-white rounded-lg border border-gray-300 p-6">
+              <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-300 pb-2 mb-4">
+                Hygiène et santé
+              </h3>
+              <div className="text-center text-gray-500 py-4">
+                <p>Informations mises à jour suite aux diagnostics EMA</p>
+                <p className="text-sm mt-2">Aucune information disponible actuellement</p>
+              </div>
+            </div>
+
+            {/* Alimentation */}
+            <div className="bg-white rounded-lg border border-gray-300 p-6">
+              <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-300 pb-2 mb-4">
+                Alimentation
+              </h3>
+              <div className="text-center text-gray-500 py-4">
+                <p>Informations mises à jour suite aux diagnostics EMA</p>
+                <p className="text-sm mt-2">Aucune information disponible actuellement</p>
+              </div>
+            </div>
+
+            {/* Ressources personnelles et institutionnelles */}
+            <div className="bg-white rounded-lg border border-gray-300 p-6">
+              <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-300 pb-2 mb-4">
+                Ressources personnelles et institutionnelles
+              </h3>
+              <div className="text-center text-gray-500 py-4">
+                <p>Informations mises à jour suite aux diagnostics EMA</p>
+                <p className="text-sm mt-2">Aucune information disponible actuellement</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Demande en cours Section */}
-      {activeTab === 'Demande en cours' && (
+      {/* Demande active Section */}
+      {activeTab === 'Demande active' && (
          <div>
           {household.demande ? (
             <div className="space-y-8 text-gray-800">
@@ -310,52 +350,101 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
         </div>
       )}
 
-      {/* History of Requests Section */}
-      {activeTab === 'Historique des demandes' && (
+      {/* Evaluations Section */}
+      {activeTab === 'Evaluations' && (
         <div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-rose-100">
-                  {['ID Demande', 'Date', 'Type', 'Statut', 'Adresse'].map(header => (
-                    <th key={header} className="border border-gray-300 p-2 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">{header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedHistory.map((demande: Demande) => (
-                  <tr key={demande.idDemande} className="bg-white hover:bg-rose-50/50 transition-colors duration-150">
-                    <td className="border border-gray-300 p-2 text-sm text-gray-800">{demande.idDemande}</td>
-                    <td className="border border-gray-300 p-2 text-sm text-gray-800">{demande.date}</td>
-                    <td className="border border-gray-300 p-2 text-sm text-gray-800">{demande.details.typeDemandes}</td>
-                    <td className="border border-gray-300 p-2 text-sm text-gray-800">{demande.statutDemandeSisiao}</td>
-                    <td className="border border-gray-300 p-2 text-sm text-gray-800">{demande.localisation.adresse}</td>
-                  </tr>
-                ))}
-                {emptyHistoryRows.map((_, index) => (
-                   <tr key={`empty-hist-${index}`} className="bg-white h-[45px]">
-                    <td className="border border-gray-300" colSpan={5}></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 mb-8 text-gray-800">
+            <InfoBlock label="ID SISIAO" value={household.idSisiao} />
+            <InfoBlock label="Statut ménage" value={household.statut} />
           </div>
-          <div className="flex justify-end items-center mt-2 text-sm font-medium text-gray-600 gap-2">
-             <button
-                onClick={() => setHistoryCurrentPage(p => p - 1)}
-                disabled={historyCurrentPage === 1}
-                className="px-2 py-1 rounded-md bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-              >
-                Précédent
-              </button>
-            <span>{historyCurrentPage} sur {historyTotalPages}</span>
-             <button
-                onClick={() => setHistoryCurrentPage(p => p + 1)}
-                disabled={historyCurrentPage === historyTotalPages}
-                className="px-2 py-1 rounded-md bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-              >
-                Suivant
-              </button>
+          
+          <div className="bg-white rounded-lg border border-gray-300 p-6">
+            <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-300 pb-2 mb-4">
+              Évaluations sociales SISIAO
+            </h3>
+            <div className="text-center text-gray-500 py-8">
+              <p>Aucune évaluation sociale disponible pour ce ménage.</p>
+              <p className="text-sm mt-2">Les évaluations du SISIAO seront affichées ici.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prestations Section */}
+      {activeTab === 'Prestations' && (
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 mb-8 text-gray-800">
+            <InfoBlock label="ID SISIAO" value={household.idSisiao} />
+            <InfoBlock label="Statut ménage" value={household.statut} />
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-300 p-6">
+            <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-300 pb-2 mb-4">
+              Historique des prestations EMA
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-rose-100">
+                    {['Date', 'Type de prestation', 'Intervenant', 'Commentaire'].map(header => (
+                      <th key={header} className="border border-gray-300 p-2 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">{header}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedHistory.map((demande: Demande) => (
+                    <tr key={demande.idDemande} className="bg-white hover:bg-rose-50/50 transition-colors duration-150">
+                      <td className="border border-gray-300 p-2 text-sm text-gray-800">{demande.date}</td>
+                      <td className="border border-gray-300 p-2 text-sm text-gray-800">{demande.details.typeDemandes}</td>
+                      <td className="border border-gray-300 p-2 text-sm text-gray-800">EMA</td>
+                      <td className="border border-gray-300 p-2 text-sm text-gray-800">{demande.details.commentaire}</td>
+                    </tr>
+                  ))}
+                  {emptyHistoryRows.map((_, index) => (
+                     <tr key={`empty-prest-${index}`} className="bg-white h-[45px]">
+                      <td className="border border-gray-300" colSpan={4}></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end items-center mt-2 text-sm font-medium text-gray-600 gap-2">
+               <button
+                  onClick={() => setHistoryCurrentPage(p => p - 1)}
+                  disabled={historyCurrentPage === 1}
+                  className="px-2 py-1 rounded-md bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+              <span>{historyCurrentPage} sur {historyTotalPages}</span>
+               <button
+                  onClick={() => setHistoryCurrentPage(p => p + 1)}
+                  disabled={historyCurrentPage === historyTotalPages}
+                  className="px-2 py-1 rounded-md bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Diagnostic Section */}
+      {activeTab === 'Diagnostic' && (
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 mb-8 text-gray-800">
+            <InfoBlock label="ID SISIAO" value={household.idSisiao} />
+            <InfoBlock label="Statut ménage" value={household.statut} />
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-300 p-6">
+            <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-300 pb-2 mb-4">
+              Historique des diagnostics EMA
+            </h3>
+            <div className="text-center text-gray-500 py-8">
+              <p>Aucun diagnostic disponible pour ce ménage.</p>
+              <p className="text-sm mt-2">Les diagnostics réalisés par les EMA seront affichés ici.</p>
+            </div>
           </div>
         </div>
       )}

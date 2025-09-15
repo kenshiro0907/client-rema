@@ -5,12 +5,15 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "");
   return {
     define: {},
+    css: {
+      postcss: './postcss.config.cjs',
+    },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "."),
       },
     },
-    /*server: {
+    server: {
       proxy: {
         "/api": {
           target: "https://re7-rema-il93.ariane-suivi-social.net",
@@ -20,6 +23,6 @@ export default defineConfig(({ mode }) => {
           cookieDomainRewrite: "localhost",
         },
       },
-    },*/
+    },
   };
 });

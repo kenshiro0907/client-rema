@@ -44,21 +44,107 @@ export type ClotureMotif =
   | "Ménage plus en demande"
   | "Ménage hébergé/hospitalisé";
 
+// New types for enhanced household management
+export interface EvaluationSisiao {
+  id: string;
+  date: string;
+  type: string;
+  statut: string;
+  commentaire: string;
+  evaluateur: string;
+}
+
+export interface SuiviSocialSection {
+  lieuVie?: {
+    typeLogement: string;
+    conditionsMaterielles: string;
+    commentaire: string;
+  };
+  hygieneSante?: {
+    etatHygiene: string;
+    problemesSante: string;
+    commentaire: string;
+  };
+  alimentation?: {
+    accesAlimentation: string;
+    habitudesAlimentaires: string;
+    commentaire: string;
+  };
+  ressources?: {
+    ressourcesPersonnelles: string;
+    ressourcesInstitutionnelles: string;
+    commentaire: string;
+  };
+}
+
+export interface PrestationEMA {
+  id: string;
+  date: string;
+  type: string;
+  intervenant: string;
+  commentaire: string;
+  montant?: number;
+}
+
+export interface DiagnosticEMA {
+  id: string;
+  date: string;
+  type: string;
+  intervenant: string;
+  resultats: string;
+  recommandations: string;
+}
+
+// Interface pour les données API réelles
+export interface HouseholdAPI {
+  id: number;
+  nom: string;
+  prenom: string;
+  adresse: string;
+  cp: string;                    // Code postal
+  ville: string;                 // Ville
+  naissance: string;             // Date de naissance
+  tel: string;                   // Téléphone
+  statut: number;                // Statut numérique
+  alerte_personnelle: string | null;
+  date_alerte: string | null;
+  date_mesure_veille: string | null;
+  duree_veille: string | null;
+  mesure_veille: string | null;
+  precision: string | null;
+}
+
+// Interface pour l'application (compatible avec l'existant)
 export interface Household {
   id: string;
   nom: string;
   prenom: string;
-  idSisiao: string;
-  adresse: string;
-  codePostal: string;
-  secteur: number;
-  statut: "A rencontrer" | "Rencontré" | "Clôturé";
+  idSisiao: string;              // Mappé depuis API.id
+  adresse: string;               // Mappé depuis API.ville
+  codePostal: string;            // Mappé depuis API.cp
+  secteur: number;               // Pas dans l'API, valeur par défaut
+  statut: "A rencontrer" | "Rencontré" | "Clôturé"; // Mappé depuis API.statut
   synthese: string;
   compositionFamiliale: string;
   members: Member[];
   demande?: Demande;
   history?: Demande[];
   contacts?: ContactData[];
+  // New fields for enhanced functionality
+  evaluations?: EvaluationSisiao[];
+  suiviSocial?: SuiviSocialSection;
+  prestations?: PrestationEMA[];
+  diagnostics?: DiagnosticEMA[];
+  alertePersonnelle?: string; // Personal alert field
+  // Champs API supplémentaires
+  naissance?: string;
+  tel?: string;
+  alerte_personnelle?: string | null;
+  date_alerte?: string | null;
+  date_mesure_veille?: string | null;
+  duree_veille?: string | null;
+  mesure_veille?: string | null;
+  precision?: string | null;
 }
 
 export type NavItem = "Ménage" | "Intervenants" | "Statistiques" | "Dashboard";

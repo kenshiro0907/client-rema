@@ -163,7 +163,9 @@ const DashboardPage: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/data/dashboard.json');
+                const response = await fetch('/data/dashboard.json', {
+                    credentials: 'include'
+                });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

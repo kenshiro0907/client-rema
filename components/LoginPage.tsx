@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import { User } from "../types";
+import { useAuth } from "../hooks/useAuth";
 
-interface LoginPageProps {
-  onLoginSuccess: (user: User) => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+const LoginPage: React.FC = () => {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,42 +20,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     }
 
     try {
-      const response = await fetch(
-        "https://re7-rema-il93.ariane-suivi-social.net/api/auth/login/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ username: email, password }),
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError("Email ou mot de passe incorrect.");
-        } else {
-          setError("Erreur lors de la connexion. Veuillez réessayer.");
-        }
+      const result = await login({ username: email, password });
+      
+      if (!result.success) {
+        setError(result.message || "Erreur lors de la connexion.");
         setIsLoading(false);
         return;
       }
 
-      const data = await response.json();
-      // data.user_id est renvoyé, les autres champs sont vides pour l'instant
-      const user: User = {
-        email: email,
-        camion: "",
-        service: "",
-      };
-      onLoginSuccess(user);
+      // La connexion est gérée par le hook useAuth
+      setIsLoading(false);
     } catch (err) {
       console.error(err);
       setError(
         "Une erreur est survenue lors de la connexion. Veuillez réessayer."
       );
-    } finally {
       setIsLoading(false);
     }
   };
@@ -67,11 +43,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center p-4 font-sans">
       <div className="w-full max-w-md">
         <div className="bg-white shadow-lg rounded-b-lg p-8">
-          <img
-            src="/logo-ariane-rema.png"
-            alt="Logo REMA"
-            className="h-40 w-40 inline-block"
-          />
+          <div className="flex justify-center mb-6">
+            <img
+              src="/logo-ariane-rema.png"
+              alt="Logo REMA"
+              className="h-40 w-40"
+            />
+          </div>
           <h1 className="text-2xl font-semibold text-gray-700 mb-6 text-center">
             Connexion
           </h1>
