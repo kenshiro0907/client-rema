@@ -2,8 +2,7 @@
 export { useAuth } from './useAuth';
 export { useHouseholds } from './useHouseholds';
 export { useFilters } from './useFilters';
-export { useErrorHandler } from './useErrorHandler';
-export { useDataCache } from './useDataCache';
+export { useHouseholdDetails } from './useHouseholdDetails';
 
 // Re-export context hooks
 export { 

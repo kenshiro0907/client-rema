@@ -1,4 +1,4 @@
-import { Household, HouseholdAPI } from '../types';
+import { Household, HouseholdAPI, HouseholdDetailsAPI } from '../types';
 
 export interface ApiResponse<T> {
   data: T;
@@ -35,6 +35,9 @@ export class HouseholdService {
       // Champs API supplémentaires
       naissance: apiHousehold.naissance,
       tel: apiHousehold.tel,
+      age: this.calculateAge(apiHousehold.naissance),
+      sexe: this.determineSexe(apiHousehold.nom, apiHousehold.prenom), // À déterminer selon vos règles métier
+      situation: this.determineSituation(apiHousehold.statut), // À déterminer selon vos règles métier
       alerte_personnelle: apiHousehold.alerte_personnelle,
       date_alerte: apiHousehold.date_alerte,
       date_mesure_veille: apiHousehold.date_mesure_veille,
@@ -57,6 +60,56 @@ export class HouseholdService {
         return "Clôturé";
       default:
         return "A rencontrer";
+    }
+  }
+
+  /**
+   * Calcule l'âge à partir de la date de naissance
+   */
+  private static calculateAge(dateNaissance: string): number | undefined {
+    if (!dateNaissance) return undefined;
+    
+    try {
+      const birthDate = new Date(dateNaissance);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      return age;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  /**
+   * Détermine le sexe (à adapter selon vos règles métier)
+   * Pour l'instant, retourne undefined car non disponible dans l'API
+   */
+  private static determineSexe(nom: string, prenom: string): string | undefined {
+    // À implémenter selon vos règles métier
+    // Par exemple, basé sur des listes de prénoms ou autres critères
+    return undefined;
+  }
+
+  /**
+   * Détermine la situation (à adapter selon vos règles métier)
+   */
+  private static determineSituation(statut: number): string | undefined {
+    // À adapter selon vos règles métier
+    // Pour l'instant, basé sur le statut
+    switch (statut) {
+      case 1:
+        return "À rencontrer";
+      case 2:
+        return "En suivi";
+      case 3:
+        return "Clôturé";
+      default:
+        return undefined;
     }
   }
 
@@ -280,6 +333,34 @@ export class HouseholdService {
       return households;
     } catch (error) {
       this.handleError(error, 'recherche des ménages');
+    }
+  }
+
+  /**
+   * Récupère les détails d'un ménage spécifique
+   */
+  static async fetchHouseholdDetails(householdId: string): Promise<HouseholdDetailsAPI> {
+    try {
+      const response = await fetch(`${this.baseUrl}/${householdId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('Accès refusé. Vous n\'avez pas les permissions nécessaires.');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const details: HouseholdDetailsAPI = await response.json();
+      return details;
+    } catch (error) {
+      this.handleError(error, 'récupération des détails du ménage');
     }
   }
 }

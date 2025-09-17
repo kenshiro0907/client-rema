@@ -114,6 +114,59 @@ export interface HouseholdAPI {
   precision: string | null;
 }
 
+// Interface pour les données détaillées du ménage (endpoint spécifique)
+export interface HouseholdDetailsAPI {
+  menage_id: number;
+  statut: number;
+  duree_veille: string | null;
+  alerte_personnelle: string | null;
+  date_alerte: string | null;
+  auteur_alerte: string | null;
+  mesure_veille: string | null;
+  date_mesure_veille: string | null;
+  auteur_mesure_veille: string | null;
+  precision: string | null;
+  demande_prestation: DemandePrestationAPI[];
+  diagnostic_intervention: any | null;
+  composition_familiale: [string, number][]; // [type, nombre]
+}
+
+// Interface pour les demandes de prestation
+export interface DemandePrestationAPI {
+  id: number;
+  menage: number;
+  statut: number;
+  prestation_materielle: number;
+  affecter_a: number;
+  type_prestation: number;
+  demande_pourvue: string | null;
+  date_pourvue: string | null;
+  demande_cloture: string | null;
+  motif_cloture: number;
+  demandeur_principal: number;
+  composition_familiale_rema: number;
+  nombre_adulte: number;
+  nombre_enfant: number;
+  nombre_enfant_moins_3ans: number;
+  is_prestation: boolean;
+  situation: number;
+  motif_demande: number;
+  lieu_couche_veille: number;
+  nombre_signalement: number;
+  adresse: string | null;
+  ville: number;
+  code_epci: string | null;
+  adresse_lieu_de_vie: string;
+  date_rencontre: string;
+  nombre_usager: number;
+  type_contact: number;
+  contact_sans_echange: number;
+  contact_echange: number;
+  denree_bon: string | null;
+  nombre_prestation: number;
+  commentaire_maraude: string;
+}
+
 // Interface pour l'application (compatible avec l'existant)
 export interface Household {
   id: string;
@@ -139,6 +192,9 @@ export interface Household {
   // Champs API supplémentaires
   naissance?: string;
   tel?: string;
+  age?: number;
+  sexe?: string;
+  situation?: string;
   alerte_personnelle?: string | null;
   date_alerte?: string | null;
   date_mesure_veille?: string | null;
@@ -149,11 +205,6 @@ export interface Household {
 
 export type NavItem = "Ménage" | "Intervenants" | "Statistiques" | "Dashboard";
 
-export interface User {
-  email: string;
-  camion: string;
-  service: string;
-}
 
 export type MarkerType =
   | "position"

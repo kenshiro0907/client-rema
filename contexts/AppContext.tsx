@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Household, User, NavItem } from '../types';
+import { Household, NavItem } from '../types';
 
 // Types pour l'état global
 interface Filters {
@@ -31,6 +31,7 @@ interface AppState {
   filters: Filters;
   isModalOpen: boolean;
   logoutMessage: string | null;
+  isUsingFallback: boolean;
   
   // Loading states
   isLoading: boolean;
@@ -51,7 +52,8 @@ type AppAction =
   | { type: 'SET_LOGOUT_MESSAGE'; payload: string | null }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'CLEAR_ERROR' };
+  | { type: 'CLEAR_ERROR' }
+  | { type: 'SET_IS_USING_FALLBACK'; payload: boolean };
 
 // État initial
 const initialState: AppState = {
@@ -74,6 +76,7 @@ const initialState: AppState = {
   },
   isModalOpen: false,
   logoutMessage: null,
+  isUsingFallback: false,
   isLoading: false,
   error: null,
 };
@@ -96,6 +99,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         isAuthenticated: false,
         activeView: 'Ménage',
         logoutMessage: null,
+        isUsingFallback: false,
         // Nettoyage des données sensibles
         allHouseholds: [],
         displayedHouseholds: [],
@@ -176,6 +180,12 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         error: null,
       };
+
+    case 'SET_IS_USING_FALLBACK':
+      return {
+        ...state,
+        isUsingFallback: action.payload,
+      };
     
     default:
       return state;
@@ -253,15 +263,21 @@ export const useHouseholds = () => {
     dispatch({ type: 'SET_SELECTED_HOUSEHOLD', payload: id });
   };
   
+  const setIsUsingFallback = (isUsingFallback: boolean) => {
+    dispatch({ type: 'SET_IS_USING_FALLBACK', payload: isUsingFallback });
+  };
+  
   return {
     allHouseholds: state.allHouseholds,
     displayedHouseholds: state.displayedHouseholds,
     selectedHouseholdId: state.selectedHouseholdId,
     selectedHousehold: state.allHouseholds.find(h => h.id === state.selectedHouseholdId) || null,
+    isUsingFallback: state.isUsingFallback,
     setHouseholds,
     setDisplayedHouseholds,
     updateHousehold,
     setSelectedHousehold,
+    setIsUsingFallback,
   };
 };
 

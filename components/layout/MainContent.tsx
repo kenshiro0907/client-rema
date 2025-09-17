@@ -43,7 +43,6 @@ const MainContent: React.FC = () => {
             household={selectedHousehold}
             onUpdateHousehold={(id, updates) => {
               // Cette logique sera gérée par le hook useHouseholds
-              console.log('Update household:', id, updates);
             }}
           />
         ) : (

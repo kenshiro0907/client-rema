@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo, useState } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { Household } from '../types';
 import { useHouseholds as useHouseholdsContext, useFilters } from '../contexts/AppContext';
 import { HouseholdService } from '../services/householdService';
@@ -9,14 +9,15 @@ export const useHouseholds = () => {
     displayedHouseholds,
     selectedHouseholdId,
     selectedHousehold,
+    isUsingFallback,
     setHouseholds,
     setDisplayedHouseholds,
     updateHousehold,
     setSelectedHousehold,
+    setIsUsingFallback,
   } = useHouseholdsContext();
 
   const { filters } = useFilters();
-  const [isUsingFallback, setIsUsingFallback] = useState(false);
 
   /**
    * Charge tous les ménages depuis l'API
@@ -24,12 +25,6 @@ export const useHouseholds = () => {
   const fetchHouseholds = useCallback(async () => {
     try {
       const response = await HouseholdService.fetchHouseholds();
-      console.log('Données ménages reçues:', response.households);
-      if (response.households.length > 0) {
-        console.log('Premier ménage:', response.households[0]);
-        console.log('Type de statut:', typeof response.households[0].statut);
-        console.log('Valeur de statut:', response.households[0].statut);
-      }
       setHouseholds(response.households);
       // Afficher automatiquement tous les ménages chargés
       setDisplayedHouseholds(response.households);
@@ -39,7 +34,7 @@ export const useHouseholds = () => {
       setIsUsingFallback(true);
       throw error;
     }
-  }, [setHouseholds, setDisplayedHouseholds]);
+  }, [setHouseholds, setDisplayedHouseholds, setIsUsingFallback]);
 
   /**
    * Met à jour un ménage

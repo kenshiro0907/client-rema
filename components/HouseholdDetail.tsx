@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Household, Demande, ContactData, ClotureMotif } from '../types';
 import { useHouseholds } from '../contexts/AppContext';
+import { useHouseholdDetails } from '../hooks/useHouseholdDetails';
 import ContactModal from './ContactModal';
 import ClotureModal from './ClotureModal';
 
@@ -13,6 +14,16 @@ interface HouseholdDetailProps {
 
 const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHousehold }) => {
   const { updateHousehold } = useHouseholds();
+  const { 
+    householdDetails, 
+    isLoading: isLoadingDetails, 
+    error: detailsError,
+    fetchHouseholdDetails, 
+    clearHouseholdDetails,
+    formatCompositionFamiliale,
+    formatDemandesPrestation
+  } = useHouseholdDetails();
+  
   const [activeTab, setActiveTab] = useState('Infos générales');
   const [historyCurrentPage, setHistoryCurrentPage] = useState(1);
   const [isContactModalOpen, setContactModalOpen] = useState(false);
@@ -64,12 +75,23 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
     setActiveTab('Infos générales');
     setHistoryCurrentPage(1);
     setGeoState({ loading: false, error: null, coords: null }); // Reset geo state
-  }, [household.id]);
+    clearHouseholdDetails(); // Clear previous details
+  }, [household.id, clearHouseholdDetails]);
+
+  // Load household details when component mounts or household changes
+  useEffect(() => {
+    if (household.id) {
+      fetchHouseholdDetails(household.id);
+    }
+  }, [household.id, fetchHouseholdDetails]);
 
   // Effect to handle geocoding when tab is active
   useEffect(() => {
     if (activeTab === 'Demande active' && household.demande) {
       geocodeAddress(household.demande.localisation);
+    } else if (activeTab === 'Demande active' && !household.demande) {
+      // Reset geo state when no demand is available
+      setGeoState({ loading: false, error: null, coords: null });
     }
   }, [activeTab, household.demande, geocodeAddress]);
 
@@ -169,12 +191,7 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
 
   // Define tabs based on requirements
   const getAvailableTabs = () => {
-    const baseTabs = ['Infos générales', 'Evaluations', 'Suivi social', 'Prestations', 'Diagnostic'];
-    
-    // Add "Demande active" only if there's an active demand with "En attente de traitement" status
-    if (household.demande && household.demande.statutDemandeSisiao === 'En attente de traitement') {
-      return ['Infos générales', 'Demande active', ...baseTabs.slice(1)];
-    }
+    const baseTabs = ['Infos générales', 'Demande active', 'Evaluations', 'Suivi social', 'Prestations', 'Diagnostic'];
     
     return baseTabs;
   };
@@ -223,35 +240,53 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 mb-8 text-gray-800">
             <InfoBlock label="ID SISIAO" value={household.idSisiao} />
             <InfoBlock label="Statut ménage" value={household.statut} />
-            <InfoBlock label="Composition familiale" value={household.compositionFamiliale} />
+            <InfoBlock 
+              label="Composition familiale" 
+              value={
+                householdDetails 
+                  ? formatCompositionFamiliale(householdDetails.composition_familiale)
+                  : household.compositionFamiliale || 'Chargement...'
+              } 
+            />
           </div>
-          
-          {/* Members Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-blue-100/70">
-                  {['Contact principal', 'Nom', 'Prénom', 'Tel', 'Naissance', 'Age', 'Sexe', 'Situation', 'Id'].map(header => (
-                    <th key={header} className="p-2 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">{header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {household.members.map((member) => (
-                  <tr key={member.id} className="bg-white hover:bg-rose-50/50 transition-colors duration-150 border-b border-gray-200">
-                    <td className="p-2 text-sm text-gray-800 text-center">{member.isPrincipal && <span className="text-green-600 font-bold">✓</span>}</td>
-                    <td className="p-2 text-sm text-gray-800">{member.nom}</td>
-                    <td className="p-2 text-sm text-gray-800">{member.prenom}</td>
-                    <td className="p-2 text-sm text-gray-800">{member.tel}</td>
-                    <td className="p-2 text-sm text-gray-800">{member.naissance}</td>
-                    <td className="p-2 text-sm text-gray-800">{member.age}</td>
-                    <td className="p-2 text-sm text-gray-800">{member.sexe}</td>
-                    <td className="p-2 text-sm text-gray-800">{member.situation}</td>
-                    <td className="p-2 text-sm text-gray-800">{member.id}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {/* Loading state for details */}
+          {isLoadingDetails && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-3"></div>
+                <span className="text-blue-700">Chargement des détails du ménage...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Error state for details */}
+          {detailsError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <span className="text-red-700">Erreur lors du chargement des détails: {detailsError}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Contact Principal Information */}
+          <div className="bg-white rounded-lg border border-gray-300 p-6 mb-6">
+            <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-300 pb-2 mb-4">
+              Contact Principal
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 text-gray-800">
+              <InfoBlock label="Nom" value={household.nom} />
+              <InfoBlock label="Prénom" value={household.prenom} />
+              <InfoBlock label="Téléphone" value={household.tel} />
+              <InfoBlock label="Naissance" value={household.naissance} />
+              <InfoBlock label="Âge" value={household.age ? household.age.toString() : 'Non renseigné'} />
+              <InfoBlock label="Sexe" value={household.sexe || 'Non renseigné'} />
+              <InfoBlock label="Situation" value={household.situation || 'Non renseignée'} />
+              <InfoBlock label="ID" value={household.id} />
+            </div>
           </div>
         </div>
       )}
@@ -345,7 +380,20 @@ const HouseholdDetail: React.FC<HouseholdDetailProps> = ({ household, onUpdateHo
 
             </div>
           ) : (
-            <p className="text-gray-500">Aucune demande en cours pour ce ménage.</p>
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune demande active</h3>
+              <p className="text-gray-500 mb-6">Ce ménage n'a pas de demande en cours de traitement.</p>
+              <div className="mt-6">
+                <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">
+                  Créer une nouvelle demande
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}

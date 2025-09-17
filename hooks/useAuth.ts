@@ -1,5 +1,4 @@
 import { useCallback, useEffect } from 'react';
-import { User } from '../types';
 import { useAuth as useAuthContext, useUI } from '../contexts/AppContext';
 import { AuthService } from '../services/authService';
 
@@ -17,7 +16,6 @@ export const useAuth = () => {
       if (response.success && response.user_id) {
         const userId = String(response.user_id); // S'assurer que c'est une chaîne
         login(userId);
-        console.log('User ID stocké:', userId);
         return { success: true, userId };
       } else {
         return { success: false, message: response.message || 'Erreur de connexion' };
@@ -36,31 +34,26 @@ export const useAuth = () => {
    */
   const handleLogout = useCallback(async () => {
     try {
-      console.log('🚪 Début du processus de logout...');
-      
       // 1. Tentative de logout serveur
       const logoutResult = await AuthService.logout();
-      console.log('📡 Résultat logout serveur:', logoutResult);
       
       // 2. Affichage du message de résultat
-      setLogoutMessage('✅ Déconnexion en cours...');
+      setLogoutMessage('Déconnexion en cours...');
 
       // 3. Nettoyage du contexte
       contextLogout();
-      console.log('🧹 Contexte nettoyé');
 
       // 4. Redirection immédiate
       setTimeout(() => {
-        console.log('🔄 Redirection...');
         setLogoutMessage(null);
         window.location.replace('/');
       }, 1000);
       
     } catch (error) {
-      console.error('❌ Erreur lors du logout:', error);
+      console.error('Erreur lors du logout:', error);
       
       // En cas d'erreur, forcer la déconnexion
-      setLogoutMessage('❌ Déconnexion forcée...');
+      setLogoutMessage('Déconnexion forcée...');
       contextLogout();
       
       setTimeout(() => {
@@ -77,7 +70,6 @@ export const useAuth = () => {
     try {
       // Ne pas vérifier l'auth si on est déjà en cours de logout
       if (logoutMessage) {
-        console.log('Auth check ignoré: logout en cours');
         return;
       }
 
@@ -86,10 +78,8 @@ export const useAuth = () => {
         // L'utilisateur est authentifié mais on n'a pas son user_id
         // On utilise un placeholder seulement si on n'a pas déjà un user_id
         login('authenticated_user');
-        console.log('Auth check: utilisateur authentifié sans user_id, placeholder utilisé');
       } else if (!isAuth && userId) {
         // L'utilisateur n'est plus authentifié côté serveur
-        console.log('Auth check: session expirée, déconnexion locale');
         contextLogout();
         AuthService.clearLocalStorage();
       }
@@ -97,7 +87,6 @@ export const useAuth = () => {
       console.error('Auth check failed:', error);
       // En cas d'erreur, considérer comme non authentifié
       if (userId) {
-        console.log('Auth check: erreur, déconnexion locale');
         contextLogout();
         AuthService.clearLocalStorage();
       }

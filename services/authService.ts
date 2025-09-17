@@ -1,4 +1,3 @@
-import { User } from '../types';
 import { AuthSecurity } from '../security/authSecurity';
 import { DataProtection } from '../security/dataProtection';
 
@@ -8,8 +7,8 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  user_id: string;
-  success: boolean;
+  user_id: string | number;
+  success?: boolean;
   message?: string;
 }
 
@@ -51,8 +50,7 @@ export class AuthService {
         body: JSON.stringify(credentials),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      // Response status and headers logged for debugging if needed
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -60,39 +58,32 @@ export class AuthService {
         throw new Error(errorData.message || 'Erreur de connexion');
       }
 
-      console.log("Avant parsing JSON");
-      
-      // Vérifier le content-type
-      const contentType = response.headers.get('content-type');
-      console.log('Content-Type:', contentType);
-      
-      // Lire le texte brut d'abord pour debug
+      // Parse response JSON
       const responseText = await response.text();
-      console.log('Raw response text:', responseText);
       
       // Parser le JSON
       let data: LoginResponse;
       try {
         data = JSON.parse(responseText);
-        console.log('Parsed login response:', data);
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
-        console.error('Raw response that failed to parse:', responseText);
         throw new Error('Réponse serveur invalide');
       }
       
       // Réinitialiser les tentatives en cas de succès
-      if (data.success) {
+      // Si success n'est pas défini mais qu'on a un user_id, considérer comme succès
+      const isSuccess = data.success !== false && !!data.user_id;
+      if (isSuccess) {
         AuthSecurity.resetLoginAttempts(credentials.username);
-        console.log('Login réussi avec user_id:', data.user_id);
-        console.log('Type de user_id:', typeof data.user_id);
-        console.log('Valeur de user_id:', JSON.stringify(data.user_id));
       }
       
-      return data;
+      // Retourner la réponse avec success défini
+      return {
+        user_id: data.user_id,
+        success: isSuccess,
+        message: data.message
+      };
     } catch (error) {
-      // Masquage des données sensibles dans les logs
-      //const maskedError = DataProtection.maskSensitiveData(error);
       console.error('Login error:', error);
       throw new Error(error instanceof Error ? error.message : 'Erreur de connexion');
     }
@@ -103,8 +94,6 @@ export class AuthService {
    */
   static async logout(): Promise<{ success: boolean; message: string }> {
     try {
-      console.log('🚪 Logout: début du processus...');
-      
       // 1. Tentative de logout serveur
       const response = await fetch(`${this.baseUrl}/logout/`, {
         method: 'POST',
@@ -114,26 +103,20 @@ export class AuthService {
         },
         credentials: 'include',
       });
-
-      console.log('📡 Réponse logout serveur:', response.status);
       
       // 2. Nettoyage local immédiat (peu importe la réponse serveur)
       this.clearLocalStorage();
-      console.log('🧹 Nettoyage local effectué');
       
       // 3. Suppression manuelle des cookies côté client
       this.clearAllCookies();
-      console.log('🍪 Cookies supprimés côté client');
       
       if (response.ok) {
-        console.log('✅ Logout serveur réussi');
         return { success: true, message: 'Déconnexion réussie.' };
       } else {
-        console.warn('⚠️ Logout serveur échoué, mais déconnexion locale effectuée');
         return { success: true, message: 'Déconnexion locale effectuée.' };
       }
     } catch (error) {
-      console.warn('❌ Erreur lors du logout:', error);
+      console.warn('Erreur lors du logout:', error);
       // Même en cas d'erreur, nettoyer localement
       this.clearLocalStorage();
       this.clearAllCookies();
@@ -158,13 +141,10 @@ export class AuthService {
       });
 
       if (response.ok) {
-        console.log('Utilisateur authentifié détecté via API ménages');
         return true;
       } else if (response.status === 403) {
-        console.log('Utilisateur non authentifié (403)');
         return false;
       } else {
-        console.log('Erreur lors de la vérification d\'authentification:', response.status);
         return false;
       }
     } catch (error) {
@@ -206,7 +186,7 @@ export class AuthService {
         }
       });
       
-      console.log('🍪 Cookies supprimés');
+             // Cookies supprimés
     } catch (error) {
       console.warn('Erreur lors de la suppression des cookies:', error);
     }

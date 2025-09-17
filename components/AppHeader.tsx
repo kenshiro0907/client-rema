@@ -5,10 +5,7 @@ const AppHeader: React.FC = () => {
   const { userId, logout } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Debug: Vérifier le type de userId
-  console.log('AppHeader - userId:', userId);
-  console.log('AppHeader - typeof userId:', typeof userId);
-  console.log('AppHeader - userId is object:', typeof userId === 'object' && userId !== null);
+  // Vérifier le type de userId pour l'affichage
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);

@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
       // La connexion est gérée par le hook useAuth
       setIsLoading(false);
     } catch (err) {
-      console.error(err);
+      console.error('Erreur lors de la connexion:', err);
       setError(
         "Une erreur est survenue lors de la connexion. Veuillez réessayer."
       );
